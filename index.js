@@ -361,6 +361,13 @@ bot.on('message',(msg)=>{
 // ── API ──
 app.get('/health',(req,res)=>res.json({ok:true,clients:sseClients.size}));
 app.get('/inventory/:userId',(req,res)=>res.json(getInv(parseInt(req.params.userId))));
+app.get('/balance/:userId',(req,res)=>res.json({balance:userBalances[parseInt(req.params.userId)]||0}));
+app.post('/balance/:userId/add',(req,res)=>{
+  const uid=parseInt(req.params.userId),amt=parseInt(req.body.amount)||0;
+  if(!userBalances[uid])userBalances[uid]=0;
+  userBalances[uid]+=amt;
+  res.json({balance:userBalances[uid]});
+});
 
 app.listen(PORT,()=>{
   console.log('Bot is running...');

@@ -34,6 +34,7 @@ function fmtVal(v){ return v>=1000?(v/1000).toFixed(0)+'k':String(v); }
 const userInventories = {}; // { userId: [{itemId, count}] }
 const userBalances    = {}; // { userId: stars }
 const pendingAddNft   = {}; // { adminChatId: { targetUsername, targetUserId } }
+const promoCodes      = {}; // { code: { stars, uses, maxUses } }
 
 function getInv(userId){
   if(!userInventories[userId]) userInventories[userId]=[];
@@ -153,6 +154,29 @@ bot.onText(/\/addnft(?:\s+(@\S+))?/,async(msg,match)=>{
   bot.sendMessage(chatId,
     `🎁 Выдать подарок для *${username}*\n\nВыбери предмет:`,
     { parse_mode:'Markdown', reply_markup:{inline_keyboard:rows} }
+  );
+});
+
+// ── /promo создать  С СТ ──
+bot.onText(/\/promo\s+создать\s+(\S+)\s+(\d+)\s+(\d+)/, (msg, match) => {
+  const adminId = msg.from.id, chatId = msg.chat.id;
+  if(!isAdmin(adminId)){ bot.sendMessage(chatId,'❌ ет прав.'); return; }
+  const code = match[1].toUpperCase();
+  const stars = parseInt(match[2]);
+  const maxUses = parseInt(match[3]);
+  promoCodes[code] = { stars, uses: 0, maxUses };
+  bot.sendMessage(chatId,
+    `✅ ромокод создан!\n\n🎟 од: \`${code}\`\n⭐ Сумма: ${stars} Stars\n🔢 спользований: ${maxUses}`,
+    {parse_mode:'Markdown'}
+  );
+});
+
+bot.onText(/\/promo$/, (msg) => {
+  const chatId = msg.chat.id;
+  if(!isAdmin(msg.from.id)){ bot.sendMessage(chatId,'❌ ет прав.'); return; }
+  bot.sendMessage(chatId,
+    `📋 *Создание промокода:*\n\`/promo создать  С СТ\`\n\nример:\n\`/promo создать SUPER500 500 10\`\n\nто создаст промокод SUPER500 на 500 звёзд, 10 использований.`,
+    {parse_mode:'Markdown'}
   );
 });
 
@@ -360,6 +384,23 @@ bot.on('message',(msg)=>{
 
 // ── API ──
 app.get('/health',(req,res)=>res.json({ok:true,clients:sseClients.size}));
+
+// POST /promo/use — активация промокода
+app.post('/promo/use',(req,res)=>{
+  try{
+    const {code, userId} = req.body;
+    if(!code || !userId) return res.json({ok:false, error:'Missing params'});
+    const uid = parseInt(userId);
+    const promo = promoCodes[code.toUpperCase()];
+    if(!promo) return res.json({ok:false, error:'ромокод не найден'});
+    if(promo.uses >= promo.maxUses) return res.json({ok:false, error:'ромокод уже использован'});
+    promo.uses++;
+    if(!userBalances[uid]) userBalances[uid] = 0;
+    userBalances[uid] += promo.stars;
+    broadcast({type:'balance_add', userId:uid, stars:promo.stars});
+    res.json({ok:true, stars:promo.stars, balance:userBalances[uid]});
+  }catch(e){ res.json({ok:false, error:e.message}); }
+});
 
 // POST /init — фронт отправляет initData, бот возвращает баланс и инвентарь
 app.post('/init',(req,res)=>{

@@ -7,7 +7,7 @@ services:
     startCommand: node index.js
     envVars:
       - key: BOT_TOKEN
-        value: 8391766294:AAH0HhI-mHBBXdCrv8D-ViKdhXCixCw8Y0g
+        sync: false
       - key: WEBAPP_URL
         value: https://panelitachi1-lang.github.io/nft-upgrader
       - key: PORT

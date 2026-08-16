@@ -3,7 +3,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const express     = require('express');
 const cors        = require('cors');
 
-const TOKEN      = process.env.BOT_TOKEN  || '8391766294:AAH0HhI-mHBBXdCrv8D-ViKdhXCixCw8Y0g';
+const TOKEN      = process.env.BOT_TOKEN  || '8328686117:AAGqGE7xz_pa9DDZbZmt9JB_hdxKEb_aknI';
 const WEBAPP_URL = process.env.WEBAPP_URL || 'https://fakelag2009-arch.github.io/nft-upgrader';
 const PORT       = process.env.PORT       || 3001;
 

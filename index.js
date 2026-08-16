@@ -4,7 +4,7 @@ const express     = require('express');
 const cors        = require('cors');
 
 const TOKEN      = process.env.BOT_TOKEN  || '8391766294:AAH0HhI-mHBBXdCrv8D-ViKdhXCixCw8Y0g';
-const WEBAPP_URL = (process.env.WEBAPP_URL || 'https://fakelag2009-arch.github.io/nft-upgrader') + '?v=6';
+const WEBAPP_URL = (process.env.WEBAPP_URL || 'https://fakelag2009-arch.github.io/nft-upgrader') + '?v=7';
 const PORT       = process.env.PORT       || 3001;
 
 // ── ADMINS — добавь свой Telegram ID (узнать: написать @userinfobot) ──

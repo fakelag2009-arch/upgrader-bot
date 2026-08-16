@@ -360,6 +360,25 @@ bot.on('message',(msg)=>{
 
 // ── API ──
 app.get('/health',(req,res)=>res.json({ok:true,clients:sseClients.size}));
+
+// POST /init — фронт отправляет initData, бот возвращает баланс и инвентарь
+app.post('/init',(req,res)=>{
+  try{
+    const {initData} = req.body;
+    if(!initData) return res.json({balance:0,inventory:[]});
+    const p = new URLSearchParams(initData);
+    const userStr = p.get('user');
+    if(!userStr) return res.json({balance:0,inventory:[]});
+    const user = JSON.parse(decodeURIComponent(userStr));
+    const uid = parseInt(user.id);
+    if(!uid) return res.json({balance:0,inventory:[]});
+    const balance = userBalances[uid] || 0;
+    const inventory = getInv(uid);
+    if(user.username) knownUsers[user.username.toLowerCase()] = uid;
+    knownUsers[uid] = uid;
+    res.json({balance, inventory});
+  }catch(e){ res.json({balance:0,inventory:[]}); }
+});
 app.get('/inventory/:userId',(req,res)=>res.json(getInv(parseInt(req.params.userId))));
 app.get('/balance/:userId',(req,res)=>res.json({balance:userBalances[parseInt(req.params.userId)]||0}));
 app.post('/balance/:userId/add',(req,res)=>{

@@ -385,6 +385,24 @@ bot.on('message',(msg)=>{
 // ── API ──
 app.get('/health',(req,res)=>res.json({ok:true,clients:sseClients.size}));
 
+// POST /create-invoice — создаём invoice link для оплаты Stars
+app.post('/create-invoice',(req,res)=>{
+  try{
+    const amount = Math.max(1, parseInt(req.body.amount)||1);
+    const payload = 'topup_' + amount + '_' + Date.now();
+    bot.createInvoiceLink(
+      '\u2b50 \u041f\u043e\u043f\u043e\u043b\u043d\u0435\u043d\u0438\u0435 \u0431\u0430\u043b\u0430\u043d\u0441\u0430',
+      amount + ' Stars \u043d\u0430 \u0431\u0430\u043b\u0430\u043d\u0441 NFT Upgrader',
+      payload, '', 'XTR',
+      [{label: amount + ' Stars', amount: amount}]
+    ).then(link => {
+      res.json({ok:true, link});
+    }).catch(e => {
+      res.json({ok:false, error:e.message});
+    });
+  }catch(e){ res.json({ok:false, error:e.message}); }
+});
+
 // POST /promo/use — активация промокода
 app.post('/promo/use',(req,res)=>{
   try{
